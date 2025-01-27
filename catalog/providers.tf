@@ -9,8 +9,6 @@ terraform {
   }
 }
 
-provider "coder" {
-  url = var.coder_access_url
-}
+provider "coder" {}
 
 provider "kubernetes" {}

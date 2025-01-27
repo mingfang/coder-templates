@@ -122,7 +122,7 @@ resource "kubernetes_deployment" "workspace" {
           name              = "workspace"
           image             = data.coder_parameter.workspace_image.value
           image_pull_policy = "Always"
-          command = ["sh", "-c", coder_agent.pod.init_script]
+          command = ["sh", "-c", replace(coder_agent.pod.init_script, data.coder_workspace.me.access_url, var.coder_access_url)]
 
           env {
             name  = "CODER_AGENT_TOKEN"
