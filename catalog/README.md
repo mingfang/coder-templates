@@ -13,3 +13,5 @@ tags: [kubernetes, container]
 
 [Kestra](https://coder-example.rebelsoft.com/templates/coder/catalog/workspace?mode=auto&param.vscode=false&param.filebrowser=false&param.workspace_image=registry.rebelsoft.com%2Fcoder-workspace%3Alatest&param.cpu=1&param.memory=1&param.home_disk_size=1&name=kestra&param.app=kestra)
 
+[ToolJet](https://coder-example.rebelsoft.com/templates/coder/catalog/workspace?mode=auto&param.vscode=false&param.filebrowser=false&param.workspace_image=registry.rebelsoft.com%2Fcoder-workspace%3Alatest&param.cpu=1&param.memory=1&param.home_disk_size=1&name=tooljet&param.app=tooljet)
+
