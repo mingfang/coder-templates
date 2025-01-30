@@ -115,13 +115,18 @@ resource "coder_agent" "pod" {
     if [ ! -d "$HOME/.pyenv" ]; then
       curl https://pyenv.run | bash
     fi
-    
-    if ! grep -q pyenv $HOME/.bashrc; then
-    cat << EOF >> $HOME/.bashrc
-    
+
+    cat << EOF > $HOME/.pyenv_rc
     export PYENV_ROOT="\$HOME/.pyenv"
     [[ -d \$PYENV_ROOT/bin ]] && export PATH="\$PYENV_ROOT/bin:\$PATH"
     eval "\$(pyenv init -)"
+    EOF
+    source .pyenv_rc
+
+    if ! grep -q pyenv $HOME/.bashrc; then
+    cat << EOF >> $HOME/.bashrc
+
+    source .pyenv_rc
     EOF
     fi
 
@@ -136,6 +141,27 @@ resource "coder_agent" "pod" {
     
     source "$HOME/.sdkman/bin/sdkman-init.sh"
     EOF
+    fi
+
+
+    # jupyter
+
+    # if jupyter is enabled...
+    if [ ${data.coder_parameter.jupyter.value} = true ]; then
+      # if python is not installed...
+      if [ $(pyenv global) == "system" ]; then
+        echo "Installing Python 3.11..."
+        pyenv install 3.11
+        pyenv global 3.11
+      fi
+      # if jupyter is not installed...
+      if ! command -v jupyter-lab > /dev/null 2>&1; then
+        echo "Installing Jupyter..."
+        pip install jupyterlab
+      fi
+
+      echo "👷 Starting Jupyter..."
+      jupyter-lab --NotebookApp.ip='*' --no-browser --ServerApp.token='' --ServerApp.password='' > /tmp/jupyter.log 2>&1 &
     fi
 
     EOT

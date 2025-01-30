@@ -12,7 +12,3 @@ terraform {
 provider "coder" {}
 
 provider "kubernetes" {}
-l
-}
-
-provider "kubernetes" {}

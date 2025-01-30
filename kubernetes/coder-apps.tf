@@ -5,7 +5,6 @@ locals {
     "jupyter",
     "pgadmin",
     "filebrowser",
-    "settings",
   ]
 }
 
@@ -17,12 +16,12 @@ data "coder_parameter" "vscode" {
   type         = "bool"
   default      = true
   mutable      = true
-  order        = index(local.app_order, "vscode")
+  order = index(local.app_order, "vscode")
 }
 
 # vscode web
 module "vscode-web" {
-  count        = data.coder_parameter.vscode.value ? 1 : 0
+  count          = data.coder_parameter.vscode.value ? 1 : 0
   source         = "registry.coder.com/modules/vscode-web/coder"
   version        = "1.0.26"
   agent_id       = coder_agent.pod.id
@@ -37,7 +36,7 @@ data "coder_parameter" "jetbrains" {
   type         = "bool"
   default      = true
   mutable      = true
-  order        = index(local.app_order, "jetbrains")
+  order = index(local.app_order, "jetbrains")
 }
 
 resource "coder_app" "jetbrains" {
@@ -47,7 +46,7 @@ resource "coder_app" "jetbrains" {
   slug         = "jb"
   icon         = "/icon/gateway.svg"
   external     = true
-  order        = index(local.app_order, "jetbrains")
+  order = index(local.app_order, "jetbrains")
 
   url = join("", [
     "jetbrains-gateway://connect#type=coder",
@@ -66,15 +65,25 @@ data "coder_parameter" "jupyter" {
   type         = "bool"
   default      = false
   mutable      = true
-  order        = index(local.app_order, "jupyter")
+  order = index(local.app_order, "jupyter")
 }
 
-module "jupyter" {
-  count    = data.coder_parameter.jupyter.value ? 1 : 0
-  source   = "registry.coder.com/modules/jupyterlab/coder"
-  version  = "1.0.23"
-  agent_id = coder_agent.pod.id
-  order    = index(local.app_order, "jupyter")
+resource "coder_app" "jupyterlab" {
+  count        = data.coder_parameter.jupyter.value ? 1 : 0
+  agent_id     = coder_agent.pod.id
+  slug         = "jupyterlab"
+  display_name = "JupyterLab"
+  url          = "http://localhost:8888"
+  icon         = "/icon/jupyter.svg"
+  subdomain    = true
+  share        = "owner"
+  order = index(local.app_order, "jupyter")
+
+  healthcheck {
+    url       = "http://localhost:8888/healthz"
+    interval  = 5
+    threshold = 10
+  }
 }
 
 # pgadmin
@@ -85,7 +94,7 @@ data "coder_parameter" "pgadmin" {
   type         = "bool"
   default      = false
   mutable      = true
-  order        = index(local.app_order, "pgadmin")
+  order = index(local.app_order, "pgadmin")
 }
 
 resource "coder_app" "pgadmin" {
@@ -97,7 +106,7 @@ resource "coder_app" "pgadmin" {
   url          = "http://localhost:5050"
   subdomain    = true
   share        = "owner"
-  order        = index(local.app_order, "pgadmin")
+  order = index(local.app_order, "pgadmin")
 
   healthcheck {
     url       = "http://localhost:5050/misc/ping"
@@ -114,7 +123,7 @@ data "coder_parameter" "filebrowser" {
   type         = "bool"
   default      = true
   mutable      = true
-  order        = index(local.app_order, "filebrowser")
+  order = index(local.app_order, "filebrowser")
 }
 
 resource "coder_app" "filebrowser" {
@@ -126,27 +135,11 @@ resource "coder_app" "filebrowser" {
   icon         = "https://raw.githubusercontent.com/matifali/logos/main/database.svg"
   subdomain    = true
   share        = "owner"
-  order        = index(local.app_order, "filebrowser")
+  order = index(local.app_order, "filebrowser")
 
   healthcheck {
     url       = "http://localhost:13339/healthz"
     interval  = 3
     threshold = 10
   }
-}
-
-resource "coder_app" "settings" {
-  agent_id     = coder_agent.pod.id
-  display_name = "Settings"
-  slug         = "s"
-  icon         = "/icon/widgets.svg"
-  external     = true
-  order        = index(local.app_order, "settings")
-
-  url = join("/", [
-    data.coder_workspace.me.access_url,
-    data.coder_workspace_owner.me.name,
-    data.coder_workspace.me.name,
-    "settings"
-  ])
 }
