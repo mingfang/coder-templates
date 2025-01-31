@@ -103,7 +103,11 @@ resource "coder_agent" "pod" {
     cd "repo/examples/${data.coder_parameter.app.value}"
     terraform init
     terraform apply -auto-approve
+    EOT
 
+  shutdown_script = <<-EOT
+    cd "/home/coder/repo/examples/${data.coder_parameter.app.value}"
+    terraform destroy -auto-approve
     EOT
 
   # The following metadata blocks are optional. They are used to display
