@@ -194,4 +194,13 @@ resource "coder_agent" "pod" {
     interval     = 60
     timeout      = 1
   }
+
+  metadata {
+    display_name = "Uptime"
+    key          = "4_uptime"
+    script       = "ps -o etime= -p 1"
+    interval     = 60
+    timeout      = 1
+  }
+
 }
