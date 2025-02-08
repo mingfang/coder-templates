@@ -170,6 +170,7 @@ resource "kubernetes_deployment" "workspace" {
           }
 
           security_context {
+            privileged   = true
             run_as_user = "1000"
           }
 

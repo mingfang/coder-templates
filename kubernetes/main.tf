@@ -164,6 +164,11 @@ resource "coder_agent" "pod" {
       jupyter-lab --NotebookApp.ip='*' --no-browser --ServerApp.token='' --ServerApp.password='' > /tmp/jupyter.log 2>&1 &
     fi
 
+    # rclone
+    if [ ${data.coder_parameter.rclone.value} = true ]; then
+      rclone rcd --rc-web-gui --rc-web-gui-no-open-browser --rc-no-auth > /tmp/rclone.log 2>&1 &
+    fi
+
     EOT
 
   # The following metadata blocks are optional. They are used to display
