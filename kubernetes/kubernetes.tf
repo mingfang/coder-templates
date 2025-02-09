@@ -179,6 +179,10 @@ resource "kubernetes_deployment" "workspace" {
             name       = "home"
             read_only  = false
           }
+          volume_mount {
+            name       = "scratch"
+            mount_path = "/scratch"
+          }
         }
 
         # dind
@@ -289,6 +293,12 @@ resource "kubernetes_deployment" "workspace" {
           persistent_volume_claim {
             claim_name = kubernetes_persistent_volume_claim.home.metadata.0.name
             read_only  = false
+          }
+        }
+        volume {
+          name = "scratch"
+          empty_dir {
+            size_limit = "1Gi"
           }
         }
       }
