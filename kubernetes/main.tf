@@ -1,4 +1,3 @@
-
 data "coder_parameter" "project_dir" {
   name         = "project_dir"
   display_name = "Project Dir (after /home/coder/)"
@@ -81,8 +80,11 @@ resource "coder_agent" "pod" {
     LC_ALL = "C"
   }
 
-  startup_script = <<-EOT
-    set -e    
+  startup_script_behavior = "blocking"
+  startup_script          = <<-EOT
+    set -e
+    cd $HOME
+
     mkdir -p $HOME/.local/bin
 
     touch ~/.bash_profile
@@ -121,12 +123,12 @@ resource "coder_agent" "pod" {
     [[ -d \$PYENV_ROOT/bin ]] && export PATH="\$PYENV_ROOT/bin:\$PATH"
     eval "\$(pyenv init -)"
     EOF
-    source .pyenv_rc
+    source $HOME/.pyenv_rc
 
     if ! grep -q pyenv $HOME/.bashrc; then
     cat << EOF >> $HOME/.bashrc
 
-    source .pyenv_rc
+    source \$HOME/.pyenv_rc
     EOF
     fi
 
@@ -154,14 +156,12 @@ resource "coder_agent" "pod" {
         pyenv install 3.11
         pyenv global 3.11
       fi
-      # if jupyter is not installed...
-      if ! command -v jupyter-lab > /dev/null 2>&1; then
-        echo "Installing Jupyter..."
-        pip install jupyterlab
-      fi
+
+      echo "Installing Jupyter..."
+      pip install jupyterlab
 
       echo "👷 Starting Jupyter..."
-      jupyter-lab --NotebookApp.ip='*' --no-browser --ServerApp.token='' --ServerApp.password='' > /tmp/jupyter.log 2>&1 &
+      SHELL=/bin/bash jupyter-lab --NotebookApp.ip='*' --no-browser --ServerApp.token='' --ServerApp.password='' > /tmp/jupyter.log 2>&1 &
     fi
 
     # rclone
