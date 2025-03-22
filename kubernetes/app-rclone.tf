@@ -7,6 +7,16 @@ data "coder_parameter" "rclone" {
   order        = index(local.app_order, "rclone")
 }
 
+resource "coder_script" "rclone" {
+  count        = data.coder_parameter.rclone.value ? 1 : 0
+  agent_id     = coder_agent.pod.id
+  display_name = "rclone"
+  run_on_start = true
+  script       = <<-EOF
+  rclone rcd --rc-web-gui --rc-web-gui-no-open-browser --rc-no-auth --cache-dir /scratch > /tmp/rclone.log 2>&1 &
+  EOF
+}
+
 resource "coder_app" "rclone" {
   count        = data.coder_parameter.rclone.value ? data.coder_workspace.me.start_count : 0
   agent_id     = coder_agent.pod.id

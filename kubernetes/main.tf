@@ -147,10 +147,6 @@ resource "coder_agent" "pod" {
 
 
 
-    # rclone
-    if [ ${data.coder_parameter.rclone.value} = true ]; then
-      rclone rcd --rc-web-gui --rc-web-gui-no-open-browser --rc-no-auth --cache-dir /scratch > /tmp/rclone.log 2>&1 &
-    fi
 
     EOT
 
