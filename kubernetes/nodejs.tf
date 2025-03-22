@@ -28,7 +28,7 @@ resource "coder_script" "nodejs" {
 
   if [ -n "${data.coder_parameter.nodejs_version.value}" ]; then
     nvm install "${data.coder_parameter.nodejs_version.value}"
-    nvm use "${data.coder_parameter.nodejs_version.value}"
+    nvm alias default "${data.coder_parameter.nodejs_version.value}"
   fi
   EOF
 }
