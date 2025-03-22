@@ -97,26 +97,6 @@ resource "coder_agent" "pod" {
     EOF
     fi
 
-    # python
-
-    if [ ! -d "$HOME/.pyenv" ]; then
-      curl https://pyenv.run | bash
-    fi
-
-    cat << EOF > $HOME/.pyenv_rc
-    export PYENV_ROOT="\$HOME/.pyenv"
-    [[ -d \$PYENV_ROOT/bin ]] && export PATH="\$PYENV_ROOT/bin:\$PATH"
-    eval "\$(pyenv init -)"
-    EOF
-    source $HOME/.pyenv_rc
-
-    if ! grep -q pyenv $HOME/.bashrc; then
-    cat << EOF >> $HOME/.bashrc
-
-    source \$HOME/.pyenv_rc
-    EOF
-    fi
-
     # sdkman
 
     if [ ! -d "$HOME/.sdkman" ]; then
@@ -156,7 +136,7 @@ resource "coder_agent" "pod" {
     display_name = "Disk"
     key          = "3_home_disk"
     script       = "coder stat disk --path $${HOME}"
-    interval     = 60
+    interval     = 300
     timeout      = 1
   }
 
@@ -165,6 +145,22 @@ resource "coder_agent" "pod" {
     key          = "4_uptime"
     script       = "ps -o etime= -p 1"
     interval     = 60
+    timeout      = 1
+  }
+
+  metadata {
+    display_name = "Python"
+    key          = "5_python"
+    script       = "echo v$(pyenv version-name)"
+    interval     = 300
+    timeout      = 1
+  }
+
+  metadata {
+    display_name = "Node.js"
+    key          = "6_nodejs"
+    script       = "nvm current"
+    interval     = 300
     timeout      = 1
   }
 
