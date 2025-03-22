@@ -97,21 +97,6 @@ resource "coder_agent" "pod" {
     EOF
     fi
 
-    # node
-
-    if [ ! -d "$HOME/.nvm" ]; then
-      git clone https://github.com/nvm-sh/nvm.git .nvm
-    fi
-
-    if ! grep -q nvm $HOME/.bashrc; then
-    cat << EOF >> $HOME/.bashrc
-    
-    export NVM_DIR="\$HOME/.nvm"
-    [ -s "\$NVM_DIR/nvm.sh" ] && \. "\$NVM_DIR/nvm.sh"
-    [ -s "\$NVM_DIR/bash_completion" ] && \. "\$NVM_DIR/bash_completion"
-    EOF
-    fi
-
     # python
 
     if [ ! -d "$HOME/.pyenv" ]; then
@@ -144,10 +129,6 @@ resource "coder_agent" "pod" {
     source "$HOME/.sdkman/bin/sdkman-init.sh"
     EOF
     fi
-
-
-
-
     EOT
 
   # The following metadata blocks are optional. They are used to display
