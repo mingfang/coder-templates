@@ -5,6 +5,7 @@ locals {
     "cursor",
     "jetbrains",
     "jupyter",
+    "marimo",
     "pgadmin",
     "filebrowser",
     "rclone",
