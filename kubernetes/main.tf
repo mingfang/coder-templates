@@ -146,23 +146,6 @@ resource "coder_agent" "pod" {
     fi
 
 
-    # jupyter
-
-    # if jupyter is enabled...
-    if [ ${data.coder_parameter.jupyter.value} = true ]; then
-      # if python is not installed...
-      if [ $(pyenv global) == "system" ]; then
-        echo "Installing Python 3.11..."
-        pyenv install 3.11
-        pyenv global 3.11
-      fi
-
-      echo "Installing Jupyter..."
-      pip install jupyterlab
-
-      echo "👷 Starting Jupyter..."
-      SHELL=/bin/bash jupyter-lab --NotebookApp.ip='*' --no-browser --ServerApp.token='' --ServerApp.password='' > /tmp/jupyter.log 2>&1 &
-    fi
 
     # rclone
     if [ ${data.coder_parameter.rclone.value} = true ]; then
