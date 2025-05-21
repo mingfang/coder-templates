@@ -175,10 +175,6 @@ resource "kubernetes_stateful_set" "workspace" {
             name       = "home"
             mount_path = "/home/coder"
           }
-          volume_mount {
-            name       = "scratch"
-            mount_path = "/scratch"
-          }
         }
 
         # dind
@@ -208,12 +204,6 @@ resource "kubernetes_stateful_set" "workspace" {
           persistent_volume_claim {
             claim_name = kubernetes_persistent_volume_claim.home.metadata.0.name
             read_only  = false
-          }
-        }
-        volume {
-          name = "scratch"
-          empty_dir {
-            size_limit = "1Gi"
           }
         }
       }

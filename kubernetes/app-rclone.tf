@@ -13,7 +13,7 @@ resource "coder_script" "rclone" {
   display_name = "rclone"
   run_on_start = true
   script       = <<-EOF
-  rclone rcd --rc-web-gui --rc-web-gui-no-open-browser --rc-no-auth --cache-dir /scratch > /tmp/rclone.log 2>&1 &
+  rclone rcd --rc-web-gui --rc-web-gui-no-open-browser --rc-no-auth --cache-dir /tmp > /tmp/rclone.log 2>&1 &
   EOF
 }
 
