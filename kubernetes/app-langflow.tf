@@ -134,4 +134,6 @@ resource "kubernetes_deployment" "langflow" {
       }
     }
   }
+
+  wait_for_rollout = false
 }

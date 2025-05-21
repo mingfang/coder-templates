@@ -115,4 +115,6 @@ resource "kubernetes_deployment" "filebrowser" {
       }
     }
   }
+
+  wait_for_rollout = false
 }

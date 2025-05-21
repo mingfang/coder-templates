@@ -1,4 +1,3 @@
-
 locals {
   name = "coder-${lower(data.coder_workspace_owner.me.name)}-${lower(data.coder_workspace.me.name)}"
   labels = {
@@ -88,10 +87,6 @@ resource "kubernetes_persistent_volume_claim" "home" {
 
 resource "kubernetes_stateful_set" "workspace" {
   count = data.coder_workspace.me.start_count
-  depends_on = [
-    kubernetes_persistent_volume_claim.home
-  ]
-  wait_for_rollout = false
   metadata {
     name      = "coder-${lower(data.coder_workspace_owner.me.name)}-${lower(data.coder_workspace.me.name)}"
     namespace = kubernetes_namespace.this.metadata.0.name
@@ -136,7 +131,9 @@ resource "kubernetes_stateful_set" "workspace" {
           name              = "workspace"
           image             = data.coder_parameter.workspace_image.value
           image_pull_policy = "Always"
-          command           = ["sh", "-c", replace(coder_agent.pod.init_script, data.coder_workspace.me.access_url, var.coder_access_url)]
+          command = [
+            "sh", "-c", replace(coder_agent.pod.init_script, data.coder_workspace.me.access_url, var.coder_access_url)
+          ]
 
           env {
             name  = "CODER_AGENT_TOKEN"
@@ -209,4 +206,6 @@ resource "kubernetes_stateful_set" "workspace" {
       }
     }
   }
+
+  wait_for_rollout = false
 }

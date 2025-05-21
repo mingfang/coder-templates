@@ -147,4 +147,6 @@ resource "kubernetes_deployment" "pgadmin" {
       }
     }
   }
+
+  wait_for_rollout = false
 }
