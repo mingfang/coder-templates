@@ -151,7 +151,7 @@ resource "coder_agent" "pod" {
   metadata {
     display_name = "Python"
     key          = "5_python"
-    script       = "echo v$(pyenv version-name)"
+    script       = "pyenv version-name"
     interval     = 300
     timeout      = 1
   }
