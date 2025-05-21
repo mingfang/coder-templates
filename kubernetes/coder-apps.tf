@@ -6,6 +6,7 @@ locals {
     "jetbrains",
     "jupyter",
     "marimo",
+    "langflow",
     "pgadmin",
     "filebrowser",
     "rclone",
