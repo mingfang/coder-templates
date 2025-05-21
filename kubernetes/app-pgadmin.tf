@@ -31,7 +31,7 @@ resource "coder_script" "pgadmin" {
   display_name = "pgadmin"
   run_on_start = true
   script       = <<-EOF
-  socat TCP4-LISTEN:5050,reuseaddr,fork,ignoreeof TCP4:pgadmin:5050 > /tmp/pgadmin.log 2>&1 &
+  socat TCP4-LISTEN:5050,reuseaddr,fork,ignoreeof TCP4:pgadmin:5050 > /dev/null 2>&1 &
   EOF
 
 }

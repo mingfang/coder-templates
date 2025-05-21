@@ -31,7 +31,7 @@ resource "coder_script" "filebrowser" {
   display_name = "filebrowser"
   run_on_start = true
   script       = <<-EOF
-  socat TCP4-LISTEN:13339,reuseaddr,fork,ignoreeof TCP4:filebrowser:13339 > /tmp/filebrowser.log 2>&1 &
+  socat TCP4-LISTEN:13339,reuseaddr,fork,ignoreeof TCP4:filebrowser:13339 > /dev/null 2>&1 &
   EOF
 
 }

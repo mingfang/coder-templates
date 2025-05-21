@@ -31,7 +31,7 @@ resource "coder_script" "langflow" {
   display_name = "langflow"
   run_on_start = true
   script       = <<-EOF
-  socat TCP4-LISTEN:7860,reuseaddr,fork,ignoreeof TCP4:langflow:7860 > /tmp/langflow.log 2>&1 &
+  socat TCP4-LISTEN:7860,reuseaddr,fork,ignoreeof TCP4:langflow:7860 > /dev/null 2>&1 &
   EOF
 
 }
