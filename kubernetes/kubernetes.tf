@@ -172,9 +172,8 @@ resource "kubernetes_stateful_set" "workspace" {
           }
 
           volume_mount {
-            mount_path = "/home/coder"
             name       = "home"
-            read_only  = false
+            mount_path = "/home/coder"
           }
           volume_mount {
             name       = "scratch"
@@ -201,32 +200,6 @@ resource "kubernetes_stateful_set" "workspace" {
             mount_path = "/home/coder"
             name       = "home"
             read_only  = false
-          }
-        }
-
-        # filebrowser
-        dynamic "container" {
-          for_each = data.coder_parameter.filebrowser.value ? { "test" = "test" } : {}
-          content {
-            name  = "filebrowser"
-            image = "filebrowser/filebrowser:latest"
-            args  = ["--noauth", "--root", "/home/coder", "--port", "13339", "-d", "/home/coder/.filebrowser.db"]
-
-            resources {
-              requests = {
-                "cpu"    = "250m"
-                "memory" = "64Mi"
-              }
-            }
-
-            security_context {
-              run_as_user = "1000"
-            }
-
-            volume_mount {
-              name       = "home"
-              mount_path = "/home/coder"
-            }
           }
         }
 
