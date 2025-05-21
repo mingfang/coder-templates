@@ -86,7 +86,7 @@ resource "kubernetes_persistent_volume_claim" "home" {
   }
 }
 
-resource "kubernetes_deployment" "workspace" {
+resource "kubernetes_stateful_set" "workspace" {
   count = data.coder_workspace.me.start_count
   depends_on = [
     kubernetes_persistent_volume_claim.home
@@ -117,10 +117,7 @@ resource "kubernetes_deployment" "workspace" {
         "app.kubernetes.io/name" = "coder-workspace"
       }
     }
-    strategy {
-      type = "Recreate"
-    }
-
+    service_name = "coder-${lower(data.coder_workspace_owner.me.name)}-${lower(data.coder_workspace.me.name)}"
     template {
       metadata {
         labels = {
@@ -204,61 +201,6 @@ resource "kubernetes_deployment" "workspace" {
             mount_path = "/home/coder"
             name       = "home"
             read_only  = false
-          }
-        }
-
-        # pgadmin
-        dynamic "container" {
-          for_each = data.coder_parameter.pgadmin.value ? { "test" = "test" } : {}
-          content {
-            name  = "pgadmin"
-            image = "docker.io/dpage/pgadmin4:latest"
-            security_context {
-              run_as_user = "5050"
-            }
-            env {
-              name  = "PGADMIN_DEFAULT_EMAIL"
-              value = data.coder_workspace_owner.me.email
-            }
-            env {
-              name  = "PGADMIN_DEFAULT_PASSWORD"
-              value = "pgadmin"
-            }
-            env {
-              name  = "PGADMIN_LISTEN_PORT"
-              value = "5050"
-            }
-            env {
-              name  = "PGADMIN_DISABLE_POSTFIX"
-              value = "True"
-            }
-            env {
-              name  = "PGADMIN_CONFIG_SERVER_MODE"
-              value = "False"
-            }
-            env {
-              name  = "PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED"
-              value = "False"
-            }
-            env {
-              name  = "PGADMIN_CONFIG_WTF_CSRF_ENABLED"
-              value = "False"
-            }
-            resources {
-              requests = {
-                "cpu"    = "250m"
-                "memory" = "256Mi"
-              }
-            }
-            volume_mount {
-              name       = "home"
-              mount_path = "/home/coder"
-            }
-            volume_mount {
-              name       = "home"
-              mount_path = "/var/lib/pgadmin"
-              sub_path   = ".pgadmin"
-            }
           }
         }
 
