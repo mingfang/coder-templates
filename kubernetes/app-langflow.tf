@@ -120,14 +120,12 @@ resource "kubernetes_deployment" "langflow" {
           }
 
           security_context {
-            privileged  = true
             run_as_user = "1000"
           }
 
           volume_mount {
             mount_path = "/data"
             name       = "home"
-            read_only  = false
           }
         }
 
@@ -135,7 +133,6 @@ resource "kubernetes_deployment" "langflow" {
           name = "home"
           persistent_volume_claim {
             claim_name = kubernetes_persistent_volume_claim.home.metadata.0.name
-            read_only  = false
           }
         }
       }
