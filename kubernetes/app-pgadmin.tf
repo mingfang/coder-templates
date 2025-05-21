@@ -121,10 +121,6 @@ resource "kubernetes_deployment" "pgadmin" {
               "cpu"    = "250m"
               "memory" = "256Mi"
             }
-            limits = {
-              "cpu"    = data.coder_parameter.cpu.value
-              "memory" = "${data.coder_parameter.memory.value}Gi"
-            }
           }
 
           security_context {
@@ -132,8 +128,8 @@ resource "kubernetes_deployment" "pgadmin" {
           }
 
           volume_mount {
-            mount_path = "/data"
             name       = "home"
+            mount_path = "/home/coder"
           }
           volume_mount {
             name       = "home"

@@ -113,10 +113,6 @@ resource "kubernetes_deployment" "langflow" {
               "cpu"    = "250m"
               "memory" = "512Mi"
             }
-            limits = {
-              "cpu"    = data.coder_parameter.cpu.value
-              "memory" = "${data.coder_parameter.memory.value}Gi"
-            }
           }
 
           security_context {
@@ -124,8 +120,8 @@ resource "kubernetes_deployment" "langflow" {
           }
 
           volume_mount {
-            mount_path = "/data"
             name       = "home"
+            mount_path = "/data"
           }
         }
 
