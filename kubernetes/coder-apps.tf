@@ -7,6 +7,7 @@ locals {
     "jupyter",
     "marimo",
     "langflow",
+    "openhands",
     "pgadmin",
     "filebrowser",
     "rclone",
