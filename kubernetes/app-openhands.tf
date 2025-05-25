@@ -13,7 +13,7 @@ resource "coder_app" "openhands" {
   slug         = "openhands"
   display_name = "OpenHands"
   icon         = "https://raw.githubusercontent.com/All-Hands-AI/OpenHands/refs/heads/main/frontend/src/icons/hands.svg"
-  url          = "https://3000-${kubernetes_namespace.this.metadata.0.name}.rebelsoft.com"
+  url          = "https://openhands-${kubernetes_namespace.this.metadata.0.name}.rebelsoft.com"
   external     = true
   order        = index(local.app_order, "openhands")
 }
@@ -96,7 +96,7 @@ resource "kubernetes_stateful_set" "openhands" {
           }
           env {
             name  = "PUBLIC_URL_PATTERN"
-            value = "https://{port}-${kubernetes_namespace.this.metadata.0.name}.rebelsoft.com"
+            value = "https://{port}-openhands-${kubernetes_namespace.this.metadata.0.name}.rebelsoft.com"
           }
           env {
             name  = "PERMITTED_CORS_ORIGINS"
@@ -181,7 +181,40 @@ resource "kubernetes_stateful_set" "openhands" {
   wait_for_rollout = false
 }
 
-resource "kubernetes_ingress_v1" "proxy" {
+resource "kubernetes_ingress_v1" "openhands" {
+  count = data.coder_parameter.openhands.value ? data.coder_workspace.me.start_count : 0
+  metadata {
+    annotations = {
+      "nginx.ingress.kubernetes.io/server-alias"       = "openhands-${kubernetes_namespace.this.metadata.0.name}.*"
+      "nginx.ingress.kubernetes.io/force-ssl-redirect" = "true"
+      "nginx.ingress.kubernetes.io/proxy-body-size"    = "10240m"
+    }
+    name      = "openhands-${kubernetes_namespace.this.metadata.0.name}"
+    namespace = kubernetes_namespace.this.metadata.0.name
+  }
+  spec {
+    ingress_class_name = "nginx"
+    rule {
+      host = "openhands-${kubernetes_namespace.this.metadata.0.name}"
+      http {
+        path {
+          path      = "/"
+          path_type = "ImplementationSpecific"
+          backend {
+            service {
+              name = kubernetes_service.openhands.0.metadata.0.name
+              port {
+                number = kubernetes_service.openhands.0.spec.0.port.0.port
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+resource "kubernetes_ingress_v1" "openhands-proxy" {
   count = data.coder_parameter.openhands.value ? data.coder_workspace.me.start_count : 0
   metadata {
     annotations = {
@@ -189,7 +222,7 @@ resource "kubernetes_ingress_v1" "proxy" {
       "nginx.ingress.kubernetes.io/proxy-body-size"    = "10240m"
 
       "nginx.ingress.kubernetes.io/server-snippet" = <<-EOF
-        server_name ~^(?<port>[0-9]+)-${kubernetes_namespace.this.metadata.0.name}\..*;
+        server_name ~^(?<port>[0-9]+)-openhands-${kubernetes_namespace.this.metadata.0.name}\..*;
         location ~ / {
           resolver kube-dns.kube-system.svc.cluster.local valid=5s;
           set $service ${kubernetes_service.openhands.0.metadata.0.name}-0.${kubernetes_service.openhands.0.metadata.0.name}.${kubernetes_namespace.this.metadata.0.name}.svc.cluster.local;
@@ -215,15 +248,14 @@ resource "kubernetes_ingress_v1" "proxy" {
         }
         EOF
     }
-    name      = "${kubernetes_namespace.this.metadata.0.name}-proxy"
+    name      = "openhands-proxy-${kubernetes_namespace.this.metadata.0.name}"
     namespace = kubernetes_namespace.this.metadata.0.name
   }
   spec {
     ingress_class_name = "nginx"
     rule {
-      host = "${kubernetes_namespace.this.metadata.0.name}-proxy"
+      host = "openhands-proxy-${kubernetes_namespace.this.metadata.0.name}"
       http {
-        // not used; only to avoid syntax validation error
         path {
           path      = "/"
           path_type = "ImplementationSpecific"

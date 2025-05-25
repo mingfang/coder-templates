@@ -12,28 +12,10 @@ resource "coder_app" "langflow" {
   agent_id     = coder_agent.pod.id
   slug         = "langflow"
   display_name = "LangFlow"
-  url          = "http://localhost:7860"
   icon         = "https://framerusercontent.com/images/nOfdJGAX6qhOog6bqsyOeqehA.svg"
-  subdomain    = true
-  share        = "owner"
+  url          = "https://langflow-${kubernetes_namespace.this.metadata.0.name}.rebelsoft.com"
+  external     = true
   order        = index(local.app_order, "langflow")
-
-  healthcheck {
-    url       = "http://localhost:7860/index.html"
-    interval  = 3
-    threshold = 10
-  }
-}
-
-resource "coder_script" "langflow" {
-  count        = data.coder_parameter.langflow.value ? data.coder_workspace.me.start_count : 0
-  agent_id     = coder_agent.pod.id
-  display_name = "langflow"
-  run_on_start = true
-  script       = <<-EOF
-  socat TCP4-LISTEN:7860,reuseaddr,fork,ignoreeof TCP4:langflow:7860 > /dev/null 2>&1 &
-  EOF
-
 }
 
 resource "kubernetes_service" "langflow" {
@@ -47,6 +29,7 @@ resource "kubernetes_service" "langflow" {
       "app.kubernetes.io/name" = "langflow"
     }
     port {
+      name = "http"
       port = 7860
     }
 
@@ -54,7 +37,7 @@ resource "kubernetes_service" "langflow" {
   }
 }
 
-resource "kubernetes_deployment" "langflow" {
+resource "kubernetes_stateful_set" "langflow" {
   count = data.coder_parameter.langflow.value ? data.coder_workspace.me.start_count : 0
   metadata {
     name      = "langflow"
@@ -68,7 +51,7 @@ resource "kubernetes_deployment" "langflow" {
         "app.kubernetes.io/name" = "langflow"
       }
     }
-
+    service_name = "langflow"
     template {
       metadata {
         labels = {
@@ -115,10 +98,6 @@ resource "kubernetes_deployment" "langflow" {
             }
           }
 
-          security_context {
-            run_as_user = "1000"
-          }
-
           volume_mount {
             name       = "home"
             mount_path = "/data"
@@ -136,4 +115,37 @@ resource "kubernetes_deployment" "langflow" {
   }
 
   wait_for_rollout = false
+}
+
+resource "kubernetes_ingress_v1" "langflow" {
+  count = data.coder_parameter.langflow.value ? data.coder_workspace.me.start_count : 0
+  metadata {
+    annotations = {
+      "nginx.ingress.kubernetes.io/server-alias"       = "langflow-${kubernetes_namespace.this.metadata.0.name}.*"
+      "nginx.ingress.kubernetes.io/force-ssl-redirect" = "true"
+      "nginx.ingress.kubernetes.io/proxy-body-size"    = "10240m"
+    }
+    name      = "langflow-${kubernetes_namespace.this.metadata.0.name}"
+    namespace = kubernetes_namespace.this.metadata.0.name
+  }
+  spec {
+    ingress_class_name = "nginx"
+    rule {
+      host = "langflow-${kubernetes_namespace.this.metadata.0.name}"
+      http {
+        path {
+          path      = "/"
+          path_type = "ImplementationSpecific"
+          backend {
+            service {
+              name = kubernetes_service.langflow.0.metadata.0.name
+              port {
+                number = kubernetes_service.langflow.0.spec.0.port.0.port
+              }
+            }
+          }
+        }
+      }
+    }
+  }
 }
