@@ -140,10 +140,6 @@ resource "kubernetes_stateful_set" "workspace" {
             value = coder_agent.pod.token
           }
           env {
-            name  = "DOCKER_HOST"
-            value = "tcp://localhost:2375"
-          }
-          env {
             name = "NAMESPACE"
             value_from {
               field_ref {
@@ -172,6 +168,16 @@ resource "kubernetes_stateful_set" "workspace" {
             name       = "home"
             mount_path = "/home/coder"
           }
+
+          volume_mount {
+            name       = "dshm"
+            mount_path = "/dev/shm"
+          }
+
+          volume_mount {
+            name       = "dind-sock"
+            mount_path = "/var/run/docker.sock"
+          }
         }
 
         # dind
@@ -194,6 +200,11 @@ resource "kubernetes_stateful_set" "workspace" {
             name       = "home"
             read_only  = false
           }
+
+          volume_mount {
+            name       = "dind-sock"
+            mount_path = "/var/run/docker.sock"
+          }
         }
 
         volume {
@@ -201,6 +212,20 @@ resource "kubernetes_stateful_set" "workspace" {
           persistent_volume_claim {
             claim_name = kubernetes_persistent_volume_claim.home.metadata.0.name
             read_only  = false
+          }
+        }
+
+        volume {
+          name = "dshm"
+          empty_dir {
+            medium     = "Memory"
+            size_limit = "2Gi"
+          }
+        }
+
+        volume {
+          name = "dind-sock"
+          empty_dir {
           }
         }
       }
