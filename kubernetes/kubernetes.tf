@@ -203,7 +203,7 @@ resource "kubernetes_stateful_set" "workspace" {
 
           volume_mount {
             name       = "dind-sock"
-            mount_path = "/var/run/docker.sock"
+            mount_path = "/var/run"
           }
         }
 
